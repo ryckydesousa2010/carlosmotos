@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Locação de Motos - Uber</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Ícones para deixar mais bonito -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="authScreen" class="auth-screen"></div>
+
+    <div id="appRoot" class="container" style="display:none;">
+        <!-- Barra Lateral / Menu -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>LocaçãoMotos</h2>
+                <p>Para Parceiros Uber/99</p>
+            </div>
+            <nav class="menu">
+                <ul>
+                    <li class="menu-item active" data-tab="dashboard">
+                        <i class="fa fa-tachometer"></i> Dashboard
+                    </li>
+                    <li class="menu-item" data-tab="motos">
+                        <i class="fa fa-motorcycle"></i> Gestão de Motos
+                    </li>
+                    <li class="menu-item" data-tab="locacoes">
+                        <i class="fa fa-calendar-check-o"></i> Locações
+                    </li>
+                    <li class="menu-item" data-tab="clientes">
+                        <i class="fa fa-users"></i> Clientes / Parceiros
+                    </li>
+                    <li class="menu-item" data-tab="financeiro">
+                        <i class="fa fa-money"></i> Financeiro
+                    </li>
+                    <li class="menu-item" data-tab="relatorios">
+                        <i class="fa fa-bar-chart"></i> Relatórios
+                    </li>
+                    <li class="menu-item" data-tab="backup">
+                        <i class="fa fa-database"></i> Backup
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="content">
+            <header class="header">
+                <h1 id="titulo-aba">Dashboard</h1>
+                <div class="usuario">
+                    <i class="fa fa-user-circle"></i> Administrador
+                </div>
+            </header>
+
+            <div class="conteudo-abas">
+                <!-- Aba Dashboard -->
+<section id="dashboard" class="aba ativa">
+    <div class="cards-grid">
+        <div class="card card-azul">
+            <h3>Total de Motos</h3>
+            <p class="valor" id="totalMotos">0</p>
+            <small>Cadastradas no sistema</small>
+        </div>
+        <div class="card card-verde">
+            <h3>Disponíveis</h3>
+            <p class="valor" id="motosDisponiveis">0</p>
+            <small>Prontas para locação</small>
+        </div>
+        <div class="card card-azul-escuro">
+            <h3>Em Locação</h3>
+            <p class="valor" id="motosAlugadas">0</p>
+            <small>Com motoristas</small>
+        </div>
+        <div class="card card-laranja">
+            <h3>Próximas Trocas de Óleo</h3>
+            <p class="valor" id="trocasPendentes">0</p>
+            <small>Menos de 500 km restantes</small>
+        </div>
+        <div class="card card-vermelho">
+            <h3>Em Manutenção</h3>
+            <p class="valor" id="motosManutencao">0</p>
+            <small>Fora de operação</small>
+        </div>
+        <div class="card card-roxo">
+            <h3>Receita do Mês</h3>
+            <p class="valor" id="receitaMes">R$ 0,00</p>
+            <small>Total recebido</small>
+        </div>
+    </div>
+
+    <div class="grid-conteudo">
+        <!-- Últimas Locações -->
+        <div class="bloco-info">
+            <h3>Últimas Locações</h3>
+            <div id="listaUltimasLocacoes" class="lista-resumo">
+                <p class="vazio">Nenhuma locação registrada ainda.</p>
+            </div>
+        </div>
+
+        <!-- Alertas Importantes -->
+        <div class="bloco-info">
+            <h3>Avisos do Sistema</h3>
+            <div id="listaAlertas" class="lista-resumo">
+                <p class="vazio">Nenhum aviso no momento.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+                <!-- Aba Gestão de Motos -->
+<section id="motos" class="aba">
+    <div class="cabecalho-aba">
+        <h2>Gestão de Motos</h2>
+        <button class="btn-principal" id="btnAbrirCadastro">
+            <i class="fa fa-plus"></i> Nova Moto
+        </button>
+    </div>
+
+    <!-- Campo de Busca -->
+    <div class="area-busca">
+        <input type="text" id="buscaMoto" placeholder="Buscar por modelo, placa ou ano...">
+        <i class="fa fa-search"></i>
+    </div>
+
+    <!-- Tabela de Motos -->
+    <div class="tabela-container">
+        <table id="tabelaMotos">
+            <thead>
+                <tr>
+                    <th>Modelo</th>
+                    <th>Placa</th>
+                    <th>Ano</th>
+                    <th>Quilometragem Atual</th>
+                    <th>Última Troca de Óleo</th>
+                    <th>Próxima Troca</th>
+                    <th>Situação</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="corpoTabelaMotos">
+                <!-- Dados serão carregados aqui via JS -->
+                <tr>
+                    <td colspan="8" class="vazio">Nenhuma moto cadastrada ainda.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal de Cadastro/Edição -->
+    <div id="modalMoto" class="modal">
+        <div class="modal-conteudo">
+            <span class="fechar-modal">&times;</span>
+            <h3 id="tituloModal">Cadastrar Nova Moto</h3>
+            <form id="formMoto">
+                <input type="hidden" id="idMoto">
+                <div class="campo">
+                    <label>Modelo da Moto</label>
+                    <input type="text" id="modelo" required>
+                </div>
+                <div class="campo">
+                    <label>Placa</label>
+                    <input type="text" id="placa" maxlength="8" required>
+                </div>
+                <div class="campo">
+                    <label>Ano</label>
+                    <input type="number" id="ano" min="2000" max="2026" required>
+                </div>
+                <div class="campo">
+                    <label>Quilometragem Atual (km)</label>
+                    <input type="number" id="kmAtual" min="0" required>
+                </div>
+                <div class="campo">
+                    <label>Quilometragem da Última Troca de Óleo</label>
+                    <input type="number" id="kmUltimaTroca" min="0" required>
+                </div>
+                <div class="campo">
+                    <label>Intervalo recomendado para troca (km)</label>
+                    <input type="number" id="intervaloTroca" min="500" value="3000" required>
+                    <small>Padrão: 3000 km</small>
+                </div>
+                <div class="campo">
+                    <label>Situação</label>
+                    <select id="situacao" required>
+                        <option value="disponivel">Disponível</option>
+                        <option value="alugada">Alugada</option>
+                        <option value="manutencao">Em Manutenção</option>
+                        <option value="inativa">Inativa</option>
+                    </select>
+                </div>
+                <div class="botoes-form">
+                    <button type="button" class="btn-secundario" id="btnCancelar">Cancelar</button>
+                    <button type="submit" class="btn-principal">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+<!-- Aba Locações -->
+<section id="locacoes" class="aba">
+    <div class="cabecalho-aba">
+        <h2>Controle de Locações</h2>
+        <button class="btn-principal" id="btnNovaLocacao">
+            <i class="fa fa-plus"></i> Nova Locação
+        </button>
+    </div>
+
+    <!-- Filtros -->
+    <div class="area-filtros">
+        <input type="text" id="buscaLocacao" placeholder="Buscar por motorista, placa ou modelo...">
+        <select id="filtroStatus">
+            <option value="todas">Todas as situações</option>
+            <option value="ativa">Ativas</option>
+            <option value="finalizada">Finalizadas</option>
+        </select>
+    </div>
+
+    <!-- Tabela de Locações -->
+    <div class="tabela-container">
+        <table id="tabelaLocacoes">
+            <thead>
+                <tr>
+                    <th>Moto</th>
+                    <th>Placa</th>
+                    <th>Motorista</th>
+                    <th>Contato</th>
+                    <th>Data Início</th>
+                    <th>Data Fim</th>
+                    <th>Valor Diário</th>
+                    <th>Valor Total</th>
+                    <th>Situação</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="corpoTabelaLocacoes">
+                <tr>
+                    <td colspan="10" class="vazio">Nenhuma locação cadastrada ainda.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal de Cadastro/Edição de Locação -->
+    <div id="modalLocacao" class="modal">
+        <div class="modal-conteudo">
+            <span class="fechar-modal">&times;</span>
+            <h3 id="tituloModalLocacao">Nova Locação</h3>
+            <form id="formLocacao">
+                <input type="hidden" id="idLocacao">
+
+                <div class="campo">
+                    <label>Selecionar Moto</label>
+                    <select id="idMotoLocacao" required>
+                        <option value="">Escolha uma moto disponível</option>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label>Nome Completo do Motorista</label>
+                    <input type="text" id="nomeMotorista" required>
+                </div>
+
+                <div class="campo">
+                    <label>Telefone / Contato</label>
+                    <input type="text" id="contatoMotorista" required>
+                </div>
+
+                <div class="campo">
+                    <label>Data de Início</label>
+                    <input type="date" id="dataInicio" required>
+                </div>
+
+                <div class="campo">
+                    <label>Valor semanal (R$)</label>
+                    <input type="number" id="valorDiario" min="0.01" step="0.01" required>
+                </div>
+
+                <div class="campo" id="campoDataFim" style="display: none;">
+                    <label>Data de Finalização</label>
+                    <input type="date" id="dataFim">
+                </div>
+
+                <div class="botoes-form">
+                    <button type="button" class="btn-secundario" id="btnCancelarLocacao">Cancelar</button>
+                    <button type="submit" class="btn-principal" id="btnSalvarLocacao">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Aba Clientes / Parceiros -->
+<section id="clientes" class="aba">
+    <div class="cabecalho-aba">
+        <h2>Clientes e Parceiros</h2>
+        <div>
+            <button class="btn-principal" id="btnNovoCliente">
+                <i class="fa fa-plus"></i> Novo Cadastro
+            </button>
+            <button class="btn-secundario" id="btnNovaCompra">
+                <i class="fa fa-shopping-cart"></i> Registrar Compra de Peça
+            </button>
+        </div>
+    </div>
+
+    <!-- Área de Busca e Filtro -->
+    <div class="area-filtros">
+        <input type="text" id="buscaCliente" placeholder="Buscar por nome, CPF/CNPJ ou telefone...">
+        <select id="filtroTipoCliente">
+            <option value="todos">Todos os tipos</option>
+            <option value="motorista">Motorista / Locatário</option>
+            <option value="fornecedor">Fornecedor / Loja de Peças</option>
+        </select>
+    </div>
+
+    <!-- Tabela de Clientes -->
+    <div class="tabela-container">
+        <table id="tabelaClientes">
+            <thead>
+                <tr>
+                    <th>Nome / Razão Social</th>
+                    <th>CPF / CNPJ</th>
+                    <th>Telefone</th>
+                    <th>Tipo</th>
+                    <th>Endereço</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="corpoTabelaClientes">
+                <tr>
+                    <td colspan="6" class="vazio">Nenhum cadastro realizado ainda.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal Cadastro / Edição de Cliente -->
+    <div id="modalCliente" class="modal">
+        <div class="modal-conteudo">
+            <span class="fechar-modal">&times;</span>
+            <h3 id="tituloModalCliente">Novo Cadastro</h3>
+            <form id="formCliente">
+                <input type="hidden" id="idCliente">
+
+                <div class="campo">
+                    <label>Tipo de Cadastro</label>
+                    <select id="tipoCliente" required>
+                        <option value="">Selecione</option>
+                        <option value="motorista">Motorista / Locatário</option>
+                        <option value="fornecedor">Fornecedor / Loja de Peças</option>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label>Nome Completo / Razão Social</label>
+                    <input type="text" id="nomeCliente" required>
+                </div>
+
+                <div class="campo">
+                    <label>CPF / CNPJ</label>
+                    <input type="text" id="documentoCliente" placeholder="Apenas números" required>
+                </div>
+
+                <div class="campo">
+                    <label>Telefone / WhatsApp</label>
+                    <input type="text" id="telefoneCliente" placeholder="(00) 00000-0000" required>
+                </div>
+
+                <div class="campo">
+                    <label>Endereço Completo</label>
+                    <input type="text" id="enderecoCliente" placeholder="Rua, número, bairro, cidade - UF">
+                </div>
+
+                <div class="campo">
+                    <label>Observações</label>
+                    <textarea id="obsCliente" rows="2" placeholder="Informações adicionais"></textarea>
+                </div>
+
+                <div class="botoes-form">
+                    <button type="button" class="btn-secundario" id="btnCancelarCliente">Cancelar</button>
+                    <button type="submit" class="btn-principal">Salvar Cadastro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Registrar Compra de Peça -->
+    <div id="modalCompra" class="modal">
+        <div class="modal-conteudo">
+            <span class="fechar-modal">&times;</span>
+            <h3>Registrar Compra de Peça / Serviço</h3>
+            <form id="formCompra">
+                <input type="hidden" id="idCompra">
+
+                <div class="campo">
+                    <label>Fornecedor</label>
+                    <select id="idFornecedor" required>
+                        <option value="">Selecione o fornecedor</option>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label>Moto relacionada (opcional)</label>
+                    <select id="idMotoCompra">
+                        <option value="">Nenhuma / Geral</option>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label>Descrição da Peça ou Serviço</label>
+                    <input type="text" id="descricaoCompra" placeholder="Ex: Troca de óleo, pneu, pastilha de freio..." required>
+                </div>
+
+                <div class="campo">
+                    <label>Quantidade</label>
+                    <input type="number" id="qtdCompra" min="1" value="1" required>
+                </div>
+
+                <div class="campo">
+                    <label>Valor Unitário (R$)</label>
+                    <input type="number" id="valorUnitCompra" min="0.01" step="0.01" required>
+                </div>
+
+                <div class="campo">
+                    <label>Data da Compra</label>
+                    <input type="date" id="dataCompra" required>
+                </div>
+
+                <div class="campo">
+                    <label>Observações</label>
+                    <textarea id="obsCompra" rows="2" placeholder="Número da nota, garantia, etc."></textarea>
+                </div>
+
+                <div class="botoes-form">
+                    <button type="button" class="btn-secundario" id="btnCancelarCompra">Cancelar</button>
+                    <button type="submit" class="btn-principal">Registrar Compra</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+<!-- Aba Financeiro -->
+<section id="financeiro" class="aba">
+    <div class="cabecalho-aba">
+        <h2>Controle Financeiro</h2>
+        <div>
+            <button class="btn-principal" id="btnNovaMovimentacao">
+                <i class="fa fa-plus"></i> Nova Movimentação
+            </button>
+        </div>
+    </div>
+
+    <!-- Resumo do Mês -->
+    <div class="cards-grid">
+        <div class="card card-verde">
+            <h3>Receitas do Mês</h3>
+            <p class="valor" id="receitaMesFinanceiro">R$ 0,00</p>
+            <small>Total de locações finalizadas</small>
+        </div>
+        <div class="card card-vermelho">
+            <h3>Despesas do Mês</h3>
+            <p class="valor" id="despesaMesFinanceiro">R$ 0,00</p>
+            <small>Compras e serviços</small>
+        </div>
+        <div class="card card-azul">
+            <h3>Saldo do Mês</h3>
+            <p class="valor" id="saldoMesFinanceiro">R$ 0,00</p>
+            <small>Receita - Despesa</small>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="area-filtros">
+        <input type="month" id="filtroMes" value="">
+        <select id="filtroTipoMov">
+            <option value="todas">Todas as movimentações</option>
+            <option value="receita">Apenas Receitas</option>
+            <option value="despesa">Apenas Despesas</option>
+        </select>
+        <input type="text" id="buscaMovimentacao" placeholder="Buscar por descrição...">
+    </div>
+
+    <!-- Tabela de Movimentações -->
+    <div class="tabela-container">
+        <table id="tabelaMovimentacoes">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Tipo</th>
+                    <th>Descrição</th>
+                    <th>Referência</th>
+                    <th>Valor</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="corpoTabelaMov">
+                <tr>
+                    <td colspan="6" class="vazio">Nenhuma movimentação registrada.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal de Nova Movimentação Manual -->
+    <div id="modalMovimentacao" class="modal">
+        <div class="modal-conteudo">
+            <span class="fechar-modal">&times;</span>
+            <h3 id="tituloModalMov">Nova Movimentação</h3>
+            <form id="formMovimentacao">
+                <input type="hidden" id="idMov">
+
+                <div class="campo">
+                    <label>Tipo</label>
+                    <select id="tipoMov" required>
+                        <option value="receita">Receita</option>
+                        <option value="despesa">Despesa</option>
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label>Descrição</label>
+                    <input type="text" id="descricaoMov" required>
+                </div>
+
+                <div class="campo">
+                    <label>Valor (R$)</label>
+                    <input type="number" id="valorMov" min="0.01" step="0.01" required>
+                </div>
+
+                <div class="campo">
+                    <label>Data</label>
+                    <input type="date" id="dataMov" required>
+                </div>
+
+                <div class="campo">
+                    <label>Observações</label>
+                    <input type="text" id="obsMov" placeholder="Detalhes adicionais">
+                </div>
+
+                <div class="botoes-form">
+                    <button type="button" class="btn-secundario" id="btnCancelarMov">Cancelar</button>
+                    <button type="submit" class="btn-principal">Salvar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+<!-- Aba Relatórios -->
+<section id="relatorios" class="aba">
+    <div class="cabecalho-aba">
+        <h2>Relatórios e Resumos</h2>
+        <div>
+            <button class="btn-principal" id="btnImprimirRelatorio">
+                <i class="fa fa-print"></i> Imprimir / Salvar PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Área de Filtros -->
+    <div class="area-filtros">
+        <select id="tipoRelatorio">
+            <option value="mensal">Relatório Mensal</option>
+            <option value="anual">Relatório Anual</option>
+            <option value="motos">Resumo por Moto</option>
+            <option value="locacoes">Histórico de Locações</option>
+        </select>
+
+        <input type="month" id="mesRelatorio" value="">
+        <input type="number" id="anoRelatorio" min="2020" max="2050" value="" placeholder="Ano">
+
+        <select id="filtroMotoRelatorio" style="display: none;">
+            <option value="">Selecione uma moto</option>
+        </select>
+
+        <button class="btn-secundario" id="btnGerarRelatorio">
+            <i class="fa fa-search"></i> Gerar Relatório
+        </button>
+    </div>
+
+    <!-- Área do Relatório Gerado -->
+    <div class="relatorio-container" id="areaRelatorio">
+        <div class="relatorio-cabecalho" style="display: none;">
+            <h3 id="tituloRelatorio">Relatório</h3>
+            <p class="subtitulo" id="periodoRelatorio">Período</p>
+            <p class="data-geracao">Gerado em: <span id="dataGeracao"></span></p>
+            <p class="dados-desenvolvedor">Desenvolvido por | Email: seuemail@dominio.com | WhatsApp: (21) 99999-8888</p> 
+        </div>
+
+        <div id="conteudoRelatorio">
+            <p class="vazio">Selecione o tipo de relatório e clique em "Gerar Relatório" para visualizar os dados.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ABA BACKUP -->
+<section id="backup" class="aba">
+
+    <div class="cabecalho-aba">
+        <div>
+            <h2>Backup e Restauração</h2>
+            <p style="color:#64748b; margin-top:5px;">
+                Salve todos os dados do sistema em um arquivo seguro.
+            </p>
+        </div>
+    </div>
+
+    <div class="backup-grid">
+
+        <!-- CARD EXPORTAR -->
+        <div class="backup-card">
+
+            <div class="backup-icone backup-azul">
+                <i class="fa fa-download"></i>
+            </div>
+
+            <h3>Salvar Backup</h3>
+
+            <p>
+                Faça o download de uma cópia de segurança
+                contendo os dados cadastrados no sistema.
+            </p>
+
+            <button class="btn-principal" id="btnExportarBackup">
+                <i class="fa fa-download"></i>
+                Salvar Backup
+            </button>
+
+        </div>
+
+
+        <!-- CARD IMPORTAR -->
+        <div class="backup-card">
+
+            <div class="backup-icone backup-verde">
+                <i class="fa fa-upload"></i>
+            </div>
+
+            <h3>Restaurar Backup</h3>
+
+            <p>
+                Selecione um arquivo de backup anteriormente
+                salvo para recuperar os dados.
+            </p>
+
+            <input
+                type="file"
+                id="arquivoBackup"
+                accept=".json,application/json"
+                style="display:none;"
+            >
+
+            <button class="btn-principal" id="btnImportarBackup">
+                <i class="fa fa-upload"></i>
+                Restaurar Backup
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- INFORMAÇÕES -->
+    <div class="backup-info">
+
+        <h3>
+            <i class="fa fa-info-circle"></i>
+            Como funciona?
+        </h3>
+
+        <ul>
+            <li>
+                <i class="fa fa-check"></i>
+                O backup será salvo em um arquivo no seu computador.
+            </li>
+
+            <li>
+                <i class="fa fa-check"></i>
+                O arquivo contém os dados armazenados pelo sistema.
+            </li>
+
+            <li>
+                <i class="fa fa-check"></i>
+                Você pode guardar o arquivo em um pendrive, HD externo ou nuvem.
+            </li>
+
+            <li>
+                <i class="fa fa-check"></i>
+                Para recuperar os dados, basta selecionar o arquivo de backup.
+            </li>
+
+            <li>
+                <i class="fa fa-exclamation-triangle"></i>
+                A restauração substituirá os dados atuais pelos dados do backup.
+            </li>
+        </ul>
+
+    </div>
+
+
+    <!-- STATUS -->
+    <div id="statusBackup" class="status-backup"></div>
+
+</section>
+            </div>
+        </main>
+    </div>
+
+    <script src="firebase-config.js"></script>
+    <script type="module" src="cloud-sync.js"></script>
+
+    <!-- Rodapé com dados do desenvolvedor -->
+<footer id="appFooter" class="rodape-sistema" style="display:none;">
+    <p>Desenvolvido por: <strong>José Henrique / Ita-Tecnologias</strong></p>
+    <p>Email: <a href="mailto:seuemail@dominio.com">ryckydesousa2010@gmail.com</a> | WhatsApp: <a href="https://wa.me/5521988329413" target="_blank">(21) 98832-9413</a></p>
+</footer>
+</body>
+</html>
