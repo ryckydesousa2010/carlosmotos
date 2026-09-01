@@ -35,6 +35,8 @@ let saveTimer = null;
 let unsubscribeSnapshot = null;
 let appScriptLoaded = false;
 let lastServerMillis = 0;
+let auth = null;
+let db = null;
 const clientId = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
 
 function showAuth(message = "") {
@@ -224,8 +226,8 @@ if (!config.apiKey || config.apiKey.startsWith("COLE_AQUI") ||
     showConfigError();
 } else {
     const firebaseApp = initializeApp(config);
-    const auth = getAuth(firebaseApp);
-    const db = getFirestore(firebaseApp);
+auth = getAuth(firebaseApp);
+db = getFirestore(firebaseApp);
 
     // Intercepta as gravações do sistema original.
     const originalSetItem = Storage.prototype.setItem;
