@@ -1,9 +1,9 @@
 /*
- * Configuração do Firebase — LocaçãoMotos / Ita-Tecnologias
- * Projeto Firebase: motos-b1c0b
+ * CONFIGURAÇÃO DO FIREBASE - ITA-TECNOLOGIAS / LocaçãoMotos
+ * Configuração Web fornecida pelo proprietário do projeto.
  */
 window.FIREBASE_CONFIG = {
-    apiKey: "AIzaSyAZ1zgykQOQq3wMnW6rF11t6eNfeqeMlco",
+    apiKey: "AIzaSyAZ1zgyKQOq3wMnW6rF11t6eNfeqeMlco",
     authDomain: "motos-b1c0b.firebaseapp.com",
     projectId: "motos-b1c0b",
     storageBucket: "motos-b1c0b.firebasestorage.app",
